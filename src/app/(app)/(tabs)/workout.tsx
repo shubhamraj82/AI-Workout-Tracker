@@ -1,12 +1,13 @@
  import React from 'react'
+import { SafeAreaView, Text } from 'react-native'
  
- function workout() {
+ function Workout() {
    return (
-     <div>
-       workout
-     </div>
+     <SafeAreaView className='flex-1'>
+      <Text>Workout</Text>
+     </SafeAreaView>
    )
  }
  
- export default workout
+ export default Workout
  
