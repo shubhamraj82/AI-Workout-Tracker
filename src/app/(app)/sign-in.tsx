@@ -1,6 +1,7 @@
 import { useSignIn } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { KeyboardAvoidingView, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 
 export default function Page() {
@@ -39,7 +40,26 @@ export default function Page() {
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className='flex-1'>
+        <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className='flex-1'
+        >
+
+            {/* HEADER SECTION */}
+        <View className='flex-1 justify-center'>
+            <View className='items-center mb-8'>
+                <View className='w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 
+                rounded-2xl items-center justify-center mb-4 shadow-lg'> 
+                <Ionicons name='fitness' size={40} color="white"></Ionicons>
+                </View>
+                <Text className='text-3xl font-bold text-gray-900 mb-2'>FitTracker</Text>
+                <Text className='text-lg text-gray-600 text-center'>
+                    Track your fitness journey{"\n"}and reach your goals
+                </Text>
+            </View>
+            </View>    
+
       <Text>Sign in</Text>
       <TextInput
         autoCapitalize="none"
@@ -61,6 +81,7 @@ export default function Page() {
           <Text>Sign up</Text>
         </Link>
       </View>
+      </KeyboardAvoidingView>
    </SafeAreaView>
   )
 }
