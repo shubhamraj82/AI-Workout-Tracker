@@ -23,7 +23,7 @@ function Layout() {
 
      <Stack.Protected guard={!isSignedIn}>
     <Stack.Screen name="sign-in" options={{headerShown:false}}></Stack.Screen>
-    <Stack.Screen name="sign-out" options={{headerShown:false}}></Stack.Screen>
+    <Stack.Screen name="sign-up" options={{headerShown:false}}></Stack.Screen>
     </Stack.Protected>
    </Stack>
   )

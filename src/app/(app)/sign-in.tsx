@@ -3,6 +3,7 @@ import { Link, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { KeyboardAvoidingView, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
+import GoogleSignIn from '../components/GoogleSigIn'
 
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn()
@@ -46,6 +47,7 @@ export default function Page() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className='flex-1'
         >
+            <View className='flex-1 px-6'>
 
             {/* HEADER SECTION */}
         <View className='flex-1 justify-center'>
@@ -59,7 +61,7 @@ export default function Page() {
                     Track your fitness journey{"\n"}and reach your goals
                 </Text>
             </View>
-            </View>    
+                
 
             {/* Sign-in-form */}
             <View className='bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6'>
@@ -97,7 +99,8 @@ export default function Page() {
                              value={password}
                             placeholder='Enter your email'
                             placeholderTextColor="#9CA3AF"
-                            onChangeText={setEmailAddress}
+                            secureTextEntry={true}
+                            onChangeText={setPassword}
                             className='flex-1 ml-3 text-gray-900'
                             editable={!isLoading}
                             />
@@ -105,19 +108,55 @@ export default function Page() {
                     </View>
             </View>
 
-      <TextInput
-        value={password}
-        placeholder="Enter password"
-        secureTextEntry={true}
-        onChangeText={(password) => setPassword(password)}
-      />
-      <TouchableOpacity onPress={onSignInPress}>
-        <Text>Continue</Text>
-      </TouchableOpacity>
-      <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-        <Link href="/sign-up">
-          <Text>Sign up</Text>
-        </Link>
+            {/* Sign in Button */}
+
+            <TouchableOpacity
+            onPress={onSignInPress}
+            disabled={isLoading}
+            className={`rounded-xl py-4 shadow-sm mb-4 ${
+                isLoading ? 'bg-gray-400' : 'bg-blue-600'
+            }`}
+            activeOpacity={0.8}
+            >
+                <View className='flex-row items-center justify-center'>
+                    {isLoading ? (
+                        <Ionicons name='refresh' size={20} color="white"/>
+                     ) : (
+                        <Ionicons name='log-in-outline' size={20} color="white"/>
+                     )}
+                     <Text className='text-white font-semibold text-lg ml-2'>
+                        {isLoading ? 'Signing In...' : 'Sign In'}
+                     </Text>
+                </View>
+            </TouchableOpacity>
+
+            {/* divider */}
+            <View className='flex-row items-center my-4'>
+                <View className='flex-1 h-px bg-gray-200'/>
+                <Text className='px-4 text-gray-500 text-sm'>or</Text>
+                <View className='flex-1 h-px bg-gray-200'></View>
+            </View>
+
+{/* Google Sign-In button */}
+<GoogleSignIn/>
+      </View>
+
+      {/* Sign Up link */}
+      <View className='flex-row justify-center items-center mb-2'>
+        <Text className='text-gray-600'>Don't have an account? </Text>
+       <Link href="/sign-up" asChild>
+         <TouchableOpacity>
+            <Text className='text-blue-600 font-semibold'>Sign Up</Text>
+         </TouchableOpacity>
+       </Link>
+      </View>
+      {/* Footer-section */}
+      <View className='pb-6'>
+        <Text className='text-center text-gray-500 text-sm'>
+            Start Your Fitness journey Today
+        </Text>
+      </View>
+
       </View>
       </KeyboardAvoidingView>
    </SafeAreaView>
