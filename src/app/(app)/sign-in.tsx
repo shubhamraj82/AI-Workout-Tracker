@@ -2,13 +2,14 @@ import { useSignIn } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { KeyboardAvoidingView, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn()
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = React.useState('')
+  const [isLoading , setIsLoading]= useState(false)
   const [password, setPassword] = React.useState('')
 
   // Handle the submission of the sign-in form
@@ -60,13 +61,50 @@ export default function Page() {
             </View>
             </View>    
 
-      <Text>Sign in</Text>
-      <TextInput
-        autoCapitalize="none"
-        value={emailAddress}
-        placeholder="Enter email"
-        onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
-      />
+            {/* Sign-in-form */}
+            <View className='bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6'>
+                <Text className='text-2xl font-bold text-gray-900 mb-6 text-center'>
+                    Welcome Back
+                    </Text>   
+
+                    {/* Email Input */}
+                    <View className='mb-4'>
+                        <Text className='text-sm font-medium text-gray-700 mb-2'>
+                            Email
+                        </Text>
+                        <View className='flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border border-gray-400'>
+                            <Ionicons name='mail-outline' size={20} color="6B7280"/>
+                            <TextInput
+                            autoCapitalize='none'
+                            value={emailAddress}
+                            placeholder='Enter your email'
+                            placeholderTextColor="#9CA3AF"
+                            onChangeText={setEmailAddress}
+                            className='flex-1 ml-3 text-gray-900'
+                            editable={!isLoading}
+                            />
+                        </View>
+                    </View>
+
+                    {/* password Input */}
+                    <View className='mb-6'>
+                        <Text className='text-sm font-medium text-gray-700 mb-2'>
+                            Password
+                        </Text>
+                        <View className='flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border border-gray-400'>
+                            <Ionicons name='lock-closed-outline' size={20} color="#6B7280"/>
+                            <TextInput 
+                             value={password}
+                            placeholder='Enter your email'
+                            placeholderTextColor="#9CA3AF"
+                            onChangeText={setEmailAddress}
+                            className='flex-1 ml-3 text-gray-900'
+                            editable={!isLoading}
+                            />
+                        </View>
+                    </View>
+            </View>
+
       <TextInput
         value={password}
         placeholder="Enter password"
