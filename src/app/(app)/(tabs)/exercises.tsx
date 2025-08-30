@@ -2,10 +2,37 @@ import { View, Text,SafeAreaView, TextInput, TouchableOpacity, FlatList, Refresh
 import React, { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from "expo-router"
+import { defineQuery } from 'groq'
+import { client } from '@/lib/sanity/client'
 
+// Define the query outside the component for proper type generation
+export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
+...
+}`)
 const Exercises = () => {
   const [searchQuery , setSearchQuery] = useState("")
+  const [exercises , setExercises] = useState([])
+  const [filteredExercises , setFilteredExercises] = useState([])
   const router = useRouter()
+  const [refreshing , setRefreshing] = useState(false)
+  
+
+  const fetchExercises = async () =>{
+    try{
+      //fetch exercises form sanity
+      const exercises = await client.fetch(exercisesQuery)
+      setExercises(exercises)
+      setFilteredExercises(exercises)
+    }catch(error){ 
+      console.error("Error fetching exercises :", error)
+    }
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchExercises()
+    setRefreshing(false)
+  }
 
   return (
     <SafeAreaView className='flex-1 bg-gray-50'>
