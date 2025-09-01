@@ -1,17 +1,20 @@
 import { View, Text,SafeAreaView, TextInput, TouchableOpacity, FlatList, RefreshControl } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from "expo-router"
 import { defineQuery } from 'groq'
 import { client } from '@/lib/sanity/client'
+import { Exercise } from '@/lib/sanity/types'
+import ExerciseCard from '@/app/components/ExerciseCard'
+import { set } from 'date-fns'
 
 // Define the query outside the component for proper type generation
 export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
 ...
-}`)
+}`);
 const Exercises = () => {
   const [searchQuery , setSearchQuery] = useState("")
-  const [exercises , setExercises] = useState([])
+  const [exercises , setExercises] = useState<Exercise[]>([])
   const [filteredExercises , setFilteredExercises] = useState([])
   const router = useRouter()
   const [refreshing , setRefreshing] = useState(false)
@@ -25,8 +28,21 @@ const Exercises = () => {
       setFilteredExercises(exercises)
     }catch(error){ 
       console.error("Error fetching exercises :", error)
+      //you could add error handling here , like showing a toast
     }
   }
+
+  useEffect(()=>{
+    fetchExercises();
+  },[])
+
+  useEffect(()=>{
+    const filtered=exercises.filter((exercises : Exercise) =>
+   exercises.name.toLowerCase().includes(searchQuery.toLocaleLowerCase()) 
+    );
+    setFilteredExercises(filtered)
+  },[searchQuery,exercises]);
+
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -64,7 +80,7 @@ const Exercises = () => {
       </View>
 {/* Exercise-List */}
 <FlatList 
-  data={[]}
+  data={filteredExercises}
   keyExtractor={(item) => item._id}
   showsVerticalScrollIndicator={false}
   contentContainerStyle={{padding:24}}
