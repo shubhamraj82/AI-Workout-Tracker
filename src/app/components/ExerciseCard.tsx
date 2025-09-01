@@ -61,6 +61,33 @@ export default function ExerciseCard({
                 </View>
             )}
         </View>
+
+        <View className='flex-1 justify-between'>
+            <View>
+                <Text className='text-lg font-bold text-gray-900 mb-1'>
+                    {item.name}
+                </Text>
+                <Text className='text-sm text-gray-600 mb-2 ' numberOfLines={2}>
+                    {item.description || "no Description Available"}
+                </Text>
+            </View>
+
+            <View className='flex-row items-center justify-between'>
+                <View
+                className={`px-3 py-1 rounded-full ${getDifficultyColor(item.difficulty)}`}
+                >
+                    <Text className='text-xs font-semibold text-white'>
+                        {getDifficultyText(item.difficulty)}
+                    </Text>
+                </View>
+
+              {showChevron && (
+                <TouchableOpacity className='p-2'>
+                    <Ionicons name='chevron-forward' size={20} color="#6B7280"/>
+                </TouchableOpacity>
+              )}  
+            </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
