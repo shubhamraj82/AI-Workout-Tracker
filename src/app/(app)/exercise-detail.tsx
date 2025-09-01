@@ -1,13 +1,44 @@
-import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, Image } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, Image, ActivityIndicator, Linking } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import {  useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
-import {  urlFor } from '@/lib/sanity/client';
+import {  client, urlFor } from '@/lib/sanity/client';
 import { Exercise } from '@/lib/sanity/types';
+import { defineQuery } from 'groq';
+
+const singleExerciseQuery = defineQuery(
+    `*[_type == "exercise" && _id== $id][0]`
+);
+
+const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+        case "beginner":
+            return "bg-green-500";
+        case "intermediate":
+            return "bg-yellow-500";
+        case "advanced" :
+            return "bg-red-500";
+        default: 
+            return "bg-gray-500"    
+    }
+};
+
+const getDifficultyText = (difficulty : string)=>{
+    switch (difficulty) {
+        case "beginner":
+            return "Beginner";
+        case "intermediate":
+            return "Intermediate";
+        case "advanced" :
+            return "Advanced";
+        default: 
+            return "Unknown"
+    }
+};
 
 export default function ExerciseDetail() {
     const router=useRouter()
-    const [exercise , setExercise] = useState<Exercise>(null)
+    const [exercise , setExercise] = useState<Exercise | null>(null)
     const [loading , setLoading] = useState(true)
     const [aiGuidance , setAiGuidance] = useState<string>("")
     const [aiLoading, setAiLoading]=useState(false)
@@ -17,6 +48,48 @@ export default function ExerciseDetail() {
         id:string;
 }>();
 
+useEffect(()=>{
+    const fetchExercise = async () =>{
+        if(!id) return;
+
+        try{
+            const exerciseData=await client.fetch(singleExerciseQuery, {id})
+            setExercise(exerciseData)
+        }catch(error){
+            console.log("Error fetching Exercise", error)
+        }finally{
+            setLoading(false)
+        }
+    }
+    fetchExercise()
+},[id])
+
+if(loading){
+    return (
+        <SafeAreaView className='flex-1 bg-white'>
+            <View className='flex-1 items-center justify-center'>
+                <ActivityIndicator size="large" color="#0000ff"/>
+                <Text className='text-gray-500'>Loading Exercise....</Text>
+            </View>
+        </SafeAreaView>
+    )
+}
+
+if(!exercise){
+    return (
+        <SafeAreaView className='flex-1 bg-white'>
+            <View className='flex-1 items-center justify-center'>
+                <Text className='text-gray-500'>Exercise not found: {id}</Text>
+                <TouchableOpacity
+                onPress={()=> router.back()}
+                className='mt-4 bg-blue-500 px-6 py-3 rounded-lg'
+                >
+                    <Text className='text-white font-semibold'>Go Back</Text>
+                </TouchableOpacity>
+            </View>
+        </SafeAreaView>
+    )
+}
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -53,6 +126,66 @@ export default function ExerciseDetail() {
             )}
             <View className='absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t
             from-black/60 to-transparent'/>
+        </View>
+
+        {/* content */} 
+        <View className='px-6 py-6'>
+            {/* title and difficulty */}
+            <View className='flex-row items-start justify-between mb-4'>
+                <View className='flex-1 mr-4 '>
+                    <Text className='text-3xl font-bold text-gray-800 mb-2'>
+                        {exercise?.name}
+                    </Text>
+                    <View
+                    className={`self-start px-4 py-2 rounded-full ${getDifficultyColor(exercise?.difficulty)}`}
+                    >
+                        <Text className='text-sm font-semibold text-white'>
+                            {getDifficultyText(exercise?.difficulty)}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+
+            {/* Description */}
+            <View className='mb-6'>
+                <Text className='text-xl font-semibold text-gray-800 mb-3'>
+                    DESCRIPTION
+                </Text>
+                <Text className='text-gray-600 loading-6 text-base'>
+                    {exercise.description || "No description available for this exercise."}
+                </Text>
+            </View>
+
+            {/* video-url */}
+            {exercise.videoUrl && (
+                <View className='mb-6'>
+                    <Text className='text-xl font-semibold text-gray-800 mb-3'>
+                        Video Tutorial
+                    </Text>
+                    <TouchableOpacity
+                    className='bg-red-600 rounded-xl p-4 flex-row items-center '
+                    onPress={() => Linking.openURL(exercise.videoUrl)}
+                    >
+                        <View className='w-12 h-12 bg-white rounded-full items-center justify-center mr-4'>
+                            <Ionicons name='play' size={20} color="#EF4444"/>
+                        </View>
+                        <View >
+                            <Text className='text-white font-semibold text-lg'>
+                                Watch Tutorial
+                            </Text>
+                            <Text className='text-red-100 text-sm'>
+                                Learn Proper form
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* AI Guidance */}
+
+
+            {/* Action-buttons */}
+
         </View>
       </ScrollView>
     </SafeAreaView>
