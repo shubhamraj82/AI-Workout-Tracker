@@ -21,9 +21,9 @@ function Layout() {
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
      <Stack.Screen name="exercise-detail" options={{ 
       headerShown: false,
-      presentation: "modal",
+      presentation: "card",
       gestureEnabled:true,
-      animationTypeForReplace: "push"
+      animation: "fade",
       }} />
     </Stack.Protected>
 

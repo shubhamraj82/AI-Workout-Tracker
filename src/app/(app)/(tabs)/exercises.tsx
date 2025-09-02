@@ -9,8 +9,14 @@ import ExerciseCard from '@/app/components/ExerciseCard'
 import { set } from 'date-fns'
 
 // Define the query outside the component for proper type generation
-export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
-...
+export const exercisesQuery = defineQuery(`*[_type == "exercise" && isActive == true] | order(name asc) {
+  _id,
+  name,
+  description,
+  difficulty,
+  image,
+  videoUrl,
+  isActive
 }`);
 const Exercises = () => {
   const [searchQuery , setSearchQuery] = useState("")

@@ -7,7 +7,15 @@ import { Exercise } from '@/lib/sanity/types';
 import { defineQuery } from 'groq';
 
 const singleExerciseQuery = defineQuery(
-    `*[_type == "exercise" && _id== $id][0]`
+    `*[_type == "exercise" && _id== $id][0] {
+        _id,
+        name,
+        description,
+        difficulty,
+        image,
+        videoUrl,
+        isActive
+    }`
 );
 
 const getDifficultyColor = (difficulty: string) => {
@@ -50,19 +58,29 @@ export default function ExerciseDetail() {
 
 useEffect(()=>{
     const fetchExercise = async () =>{
-        if(!id) return;
+        if(!id) {
+            console.log("No ID provided");
+            return;
+        }
 
         try{
-            const exerciseData=await client.fetch(singleExerciseQuery, {id})
-            setExercise(exerciseData)
+            console.log("Fetching exercise with ID:", id);
+            const exerciseData = await client.fetch(singleExerciseQuery, {id});
+            console.log("Fetched exercise data:", exerciseData);
+            console.log("Exercise image:", exerciseData?.image);
+            setExercise(exerciseData);
         }catch(error){
-            console.log("Error fetching Exercise", error)
+            console.log("Error fetching Exercise", error);
         }finally{
-            setLoading(false)
+            setLoading(false);
         }
     }
     fetchExercise()
 },[id])
+
+const getAiGuidence = async () =>{
+    
+}
 
 if(loading){
     return (
@@ -93,7 +111,7 @@ if(!exercise){
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
-        <StatusBar barStyle='light-content' backgroundColor="#00"/>
+        <StatusBar barStyle='light-content' backgroundColor="#000000"/>
 
         {/* Header */}
         <View className='absolute top-12 left-0 right-0 z-10 px-4'>
@@ -112,20 +130,41 @@ if(!exercise){
         {/* hero Image */}
 
         <View className='h-80 bg-white relative'>
-            {exercise?.image ? (
-                <Image
-                source={{ uri : urlFor(exercise.image?.asset?._ref).url()}}
-                className='w-full h-full'
-                resizeMode='contain'
-                />
+            {exercise?.image?.asset?._ref ? (
+                (() => {
+                    try {
+                        const imageUrl = urlFor(exercise.image.asset._ref).url();
+                        console.log("Generated image URL:", imageUrl);
+                        return (
+                            <Image
+                            source={{ uri: imageUrl }}
+                            className='w-full h-full'
+                            resizeMode='contain'
+                            onError={(error) => {
+                                console.log('Image load error:', error);
+                            }}
+                            onLoad={() => {
+                                console.log('Image loaded successfully');
+                            }}
+                            />
+                        );
+                    } catch (error) {
+                        console.log("Error generating image URL:", error);
+                        return (
+                            <View className='w-full h-full bg-red-400 items-center justify-center'>
+                                <Ionicons name='warning' size={80} color="white"/>
+                                <Text className='text-white mt-2'>Image Error</Text>
+                            </View>
+                        );
+                    }
+                })()
             ):(
-                <View className='w-full h-full bg-gradient-to-br from-blue-400
-                to-purple-500 items-center justify-center'>
+                <View className='w-full h-full bg-blue-400 items-center justify-center'>
                     <Ionicons name='fitness' size={80} color="white"/>
+                    <Text className='text-white mt-2'>No Image Available</Text>
                 </View>
             )}
-            <View className='absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t
-            from-black/60 to-transparent'/>
+            <View className='absolute bottom-0 left-0 right-0 h-20 bg-black/60'/>
         </View>
 
         {/* content */} 
@@ -185,7 +224,41 @@ if(!exercise){
 
 
             {/* Action-buttons */}
+            <View className='mt-8 gap-2'>
+                {/* Ai Coach Button */}
+                <TouchableOpacity
+                className={`rounded-xl py-4 items-center ${
+                    aiLoading
+                    ? "bg-gray-400"
+                    : aiGuidance
+                    ? "bg-green-500"
+                    : "bg-blue-500"
+                }`}
+                onPress={getAiGuidence}
+                disabled={aiLoading}
+                >
+                    {aiLoading ? (
+                        <View className='flex-row items-center'>
+                            <ActivityIndicator size="small" color="white"/>
+                            <Text className='text-white font-bold text-lg ml-2'>
+                                Loading....
+                            </Text>
+                        </View>
+                    ) : (
+                        <Text className='text-white font-bold text-lg'>
+                            {aiGuidance 
+                            ? "Refresh AI Guidance"
+                            : "Get AI Guidance on Form and Technique"}
+                        </Text>
+                    )}
+                </TouchableOpacity>
 
+                <TouchableOpacity
+                className='bg-gray-200 rounded-xl py-4 items-center'
+                onPress={() => router.back()}>
+                    <Text className='text-gray-800 font-bold text-lg'>Close</Text>
+                </TouchableOpacity>
+            </View>
         </View>
       </ScrollView>
     </SafeAreaView>

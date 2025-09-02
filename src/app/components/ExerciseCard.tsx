@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native'
+import { View, Text, TouchableOpacity, Image, SafeAreaView } from 'react-native'
 import React from 'react'
 import { urlFor } from '@/lib/sanity/client'
 import { Exercise } from '@/lib/sanity/types';
@@ -48,15 +48,15 @@ export default function ExerciseCard({
     >
       <View className='flex-row p-6'>
         <View className='w-20 h-20 bg-white rounded-xl mr-4 overflow-hidden'>
-            {item.image ? (
+            {item.image?.asset?._ref ? (
                 <Image
-                source ={{uri:urlFor(item.image?.asset?._ref).url()}}
+                source={{uri: urlFor(item.image.asset._ref).url()}}
                 className='w-full h-full'
                 resizeMode="contain"
+                onError={(error) => console.log('ExerciseCard image error:', error)}
                 />
             ) : (
-                <View className='w-full h-full bg-gradient-to-br from-blue-400 to-purple-500
-                items-center justify-center'>
+                <View className='w-full h-full bg-blue-400 items-center justify-center'>
                     <Ionicons name='fitness' size={24} color="white"/>
                 </View>
             )}
