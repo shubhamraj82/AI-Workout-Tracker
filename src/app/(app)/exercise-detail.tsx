@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {  client, urlFor } from '@/lib/sanity/client';
 import { Exercise } from '@/lib/sanity/types';
 import { defineQuery } from 'groq';
+import Markdown from "react-native-markdown-display"
 
 const singleExerciseQuery = defineQuery(
     `*[_type == "exercise" && _id== $id][0] {
@@ -79,8 +80,35 @@ useEffect(()=>{
 },[id])
 
 const getAiGuidence = async () =>{
-    
-}
+    if(!exercise) return;
+
+    setAiLoading(true);
+    try {
+        const response = await fetch("/api/ai", {
+            method:"POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+                exerciseName:exercise.name,
+            }),
+        });
+
+        if(!response.ok) {
+            throw new Error("Failed to fetch AI guidance");
+        }
+
+        const data = await response.json();
+        setAiGuidance(data.message);
+    } catch (error) {
+        console.error("Error fetching AI Guidance:", error);
+        setAiGuidance(
+            "Sorry, we couldn't fetch AI guidance at this time. Please try again later."
+        );
+    }finally {
+        setAiLoading(false);
+    }
+};
 
 if(loading){
     return (
@@ -221,7 +249,51 @@ if(!exercise){
             )}
 
             {/* AI Guidance */}
+{(aiGuidance || aiLoading ) && ( 
+    <View className='mb-6'>
+        <View className='flex-row items-center mb-3'>
+            <Ionicons name='fitness' size={24} color="3B82F6"/>
+            <Text className='text-xl text-gray-800 font-semibold ml-2'>
+                AI Coach says....
+            </Text>
+        </View>
 
+{aiLoading ? (
+    <View className='bg-gray-50 rounded-xl p-4 items-center'>
+        <ActivityIndicator size="small" color="3B82F6"/>
+        <Text className='text-gray-600 mt-2'>
+            Getiing personalized guidance....
+        </Text>
+    </View>
+) : (
+    <View className='bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500'>
+        <Markdown
+        style={{
+            body:{
+                paddingBottom: 20,
+            },
+            heading2: {
+                fontSize: 18,
+                fontWeight: "bold",
+                color: "#1f2937",
+                marginTop: 12,
+                marginBottom: 6,
+            },
+            heading3: {
+                fontSize: 16,
+                fontWeight: "600",
+                color: "#374151",
+                marginTop:8,
+                marginBottom:4,
+            },
+        }}
+        >
+            {aiGuidance}
+        </Markdown>
+    </View>
+)}
+    </View>
+)}
 
             {/* Action-buttons */}
             <View className='mt-8 gap-2'>
