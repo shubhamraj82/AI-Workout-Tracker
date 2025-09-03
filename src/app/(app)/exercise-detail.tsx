@@ -10,6 +10,10 @@ import Markdown from "react-native-markdown-display"
 const singleExerciseQuery = defineQuery(
     `*[_type == "exercise" && _id== $id][0] {
         _id,
+        _type,
+        _createdAt,
+        _updatedAt,
+        _rev,
         name,
         description,
         difficulty,

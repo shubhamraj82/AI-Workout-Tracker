@@ -187,17 +187,13 @@ export type AllSanitySchemaTypes = Workout | Exercise | SanityImagePaletteSwatch
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: ../src/app/(app)/(tabs)/exercises.tsx
 // Variable: exercisesQuery
-// Query: *[_type == "exercise"] {...}
+// Query: *[_type == "exercise" && isActive == true] | order(name asc) {  _id,  name,  description,  difficulty,  image,  videoUrl,  isActive}
 export type ExercisesQueryResult = Array<{
   _id: string;
-  _type: "exercise";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  description?: string;
-  difficulty?: "advanced" | "beginner" | "intermediate";
-  image?: {
+  name: string | null;
+  description: string | null;
+  difficulty: "advanced" | "beginner" | "intermediate" | null;
+  image: {
     asset?: {
       _ref: string;
       _type: "reference";
@@ -209,24 +205,44 @@ export type ExercisesQueryResult = Array<{
     crop?: SanityImageCrop;
     alt?: string;
     _type: "image";
-  };
-  videoUrl?: string;
-  isActive?: boolean;
+  } | null;
+  videoUrl: string | null;
+  isActive: boolean | null;
+}>;
+
+// Source: ../src/app/(app)/(tabs)/history.tsx
+// Variable: getWorkoutQuery
+// Query: *[_type == "workout" && userId == $userId] | order(date desc) {  _id,  date,  duration,  exercises[] {  exercise-> {  _id,  name  },  sets[] {  reps,  weight,  weightUnit,  _type,  _key  },  _type,  _key  }  }
+export type GetWorkoutQueryResult = Array<{
+  _id: string;
+  date: string | null;
+  duration: number | null;
+  exercises: Array<{
+    exercise: {
+      _id: string;
+      name: string | null;
+    } | null;
+    sets: Array<{
+      reps: number | null;
+      weight: number | null;
+      weightUnit: "kg" | "lbs" | null;
+      _type: null;
+      _key: string;
+    }> | null;
+    _type: null;
+    _key: string;
+  }> | null;
 }>;
 
 // Source: ../src/app/(app)/exercise-detail.tsx
 // Variable: singleExerciseQuery
-// Query: *[_type == "exercise" && _id== $id][0]
+// Query: *[_type == "exercise" && _id== $id][0] {        _id,        name,        description,        difficulty,        image,        videoUrl,        isActive    }
 export type SingleExerciseQueryResult = {
   _id: string;
-  _type: "exercise";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  description?: string;
-  difficulty?: "advanced" | "beginner" | "intermediate";
-  image?: {
+  name: string | null;
+  description: string | null;
+  difficulty: "advanced" | "beginner" | "intermediate" | null;
+  image: {
     asset?: {
       _ref: string;
       _type: "reference";
@@ -238,16 +254,17 @@ export type SingleExerciseQueryResult = {
     crop?: SanityImageCrop;
     alt?: string;
     _type: "image";
-  };
-  videoUrl?: string;
-  isActive?: boolean;
+  } | null;
+  videoUrl: string | null;
+  isActive: boolean | null;
 } | null;
 
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "*[_type == \"exercise\"] {\n...\n}": ExercisesQueryResult;
-    "*[_type == \"exercise\" && _id== $id][0]": SingleExerciseQueryResult;
+    "*[_type == \"exercise\" && isActive == true] | order(name asc) {\n  _id,\n  name,\n  description,\n  difficulty,\n  image,\n  videoUrl,\n  isActive\n}": ExercisesQueryResult;
+    "*[_type == \"workout\" && userId == $userId] | order(date desc) {\n  _id,\n  date,\n  duration,\n  exercises[] {\n  exercise-> {\n  _id,\n  name\n  },\n  sets[] {\n  reps,\n  weight,\n  weightUnit,\n  _type,\n  _key\n  },\n  _type,\n  _key\n  }\n  }": GetWorkoutQueryResult;
+    "*[_type == \"exercise\" && _id== $id][0] {\n        _id,\n        name,\n        description,\n        difficulty,\n        image,\n        videoUrl,\n        isActive\n    }": SingleExerciseQueryResult;
   }
 }

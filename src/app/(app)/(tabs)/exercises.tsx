@@ -11,13 +11,18 @@ import { set } from 'date-fns'
 // Define the query outside the component for proper type generation
 export const exercisesQuery = defineQuery(`*[_type == "exercise" && isActive == true] | order(name asc) {
   _id,
+  _type,
+  _createdAt,
+  _updatedAt,
+  _rev,
   name,
   description,
   difficulty,
   image,
   videoUrl,
   isActive
-}`);
+}`)
+
 const Exercises = () => {
   const [searchQuery , setSearchQuery] = useState("")
   const [exercises , setExercises] = useState<Exercise[]>([])
