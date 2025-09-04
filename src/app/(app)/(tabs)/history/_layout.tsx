@@ -8,7 +8,13 @@ function  Layout() {
     headerShown:false,
     }}
     />
-    <Stack.Screen name='wokout-record'/>
+    <Stack.Screen name='wokout-record'
+    options={{
+      headerShown:false,
+      headerTitle:"workout Record",
+      headerBackTitle: "History",
+    }}
+    />
   </Stack>
   )
 }

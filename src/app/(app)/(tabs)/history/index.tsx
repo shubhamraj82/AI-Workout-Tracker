@@ -44,6 +44,7 @@ export default function HistoryPage() {
 
     try {
       const results= await client.fetch(getWorkoutQuery, { userId: user.id});
+      console.log(user.id);
       setWorkouts(results);
     } catch (error) {
       console.error("Error fetching Workouts", error);
@@ -137,7 +138,7 @@ export default function HistoryPage() {
       </View>
 
 
-      {/* workout-list */}\
+      {/* workout-list */}
       <ScrollView
       className="flex-1"
       contentContainerStyle={{padding:24}}
