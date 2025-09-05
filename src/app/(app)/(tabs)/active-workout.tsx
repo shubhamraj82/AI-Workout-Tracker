@@ -1,10 +1,15 @@
-import { View, Text, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert } from 'react-native'
-import React, { use } from 'react'
+import { View, Text, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView } from 'react-native'
+import React, { useState } from 'react'
 import {useStopwatch} from 'react-timer-hook';
 import { useWorkoutStore } from 'store/workout-store';
 import {  useFocusEffect, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import exercise from 'workout-ai-app/schemaTypes/exercise';
+import Exercise from 'workout-ai-app/schemaTypes/exercise';
+import ExerciseSelectionModal from '@/app/components/ExerciseSelectionModal';
 
 export default function ActiveWorkout() {
+  const [showExerciseSelection,setShowExerciseSelection] = useState(false);
   const router =useRouter()
 
   const {
@@ -51,6 +56,9 @@ export default function ActiveWorkout() {
     );
   };
 
+  const addExercise=()=>{
+    setShowExerciseSelection(true); 
+  }
 
 
   return (
@@ -62,7 +70,8 @@ export default function ActiveWorkout() {
       style={{
         paddingTop: Platform.OS === "ios" ? 55 : StatusBar.currentHeight || 0,
       }}
-      >
+      />
+
         {/* Header */}
         <View className='bg-gray-800 px-6 py-4'>
           <View className='flex-row items-center justify-between'>
@@ -114,8 +123,71 @@ export default function ActiveWorkout() {
             </View>
           </View>
         </View>
-      </View>
+{/* Content Area with white Background */}
+<View className='flex-1 bg-white'>
+  {/* Workout Progress */}
+  <View className='px-6 mt-4'>
+    <Text className='text-center text-gray-600 mb-2'>
+      {workoutExercises.length} exercises
+    </Text>
+  </View>
+
+  {/* if no exercise, show a message */}
+  {workoutExercises.length===0 && (
+    <View className='bg-gray-50 rounded-2xl p-8 items-center mx-6'>
+      <Ionicons name='barbell-outline' size={48} color="#9CA3AF"/>
+      <Text className='text-gray-600 text-lg text-center mt-4 font-medium'>
+        No exercise yet
+      </Text>
+      <Text className='text-gray-500 text-center mt-2'>
+        Get Started by adding your first exercise below
+      </Text>
     </View>
+  )}
+
+  {/* All Exercises Vertical list */}
+  <KeyboardAvoidingView
+  behavior={Platform.OS == "ios" ? "padding" : "height"}
+  className='flex-1'
+  >
+    <ScrollView className='flex-1 px-6 mt-4'>
+      {workoutExercises.map((exercise)=>(
+        <View key={exercise.id} className='mb-8'>
+
+        </View>
+      ))}
+
+
+      {/* Add Exercise Button */}
+      <TouchableOpacity
+      onPress={addExercise}
+      className='bg-blue-600 rounded-2xl py-4 items-center mb-8 active:bg-blue-700'
+      activeOpacity={0.8}
+      >
+        <View className='flex-row items-center'>
+          <Ionicons
+          name='add'
+          size={20}
+          color="white"
+          style={{marginRight:8}}
+          />
+          <Text className='text-white font-semibold text-lg'>
+            Add Exercise
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+    </ScrollView>
+  </KeyboardAvoidingView>
+</View>
+
+{/* Exercise Selection Modal  */}
+<ExerciseSelectionModal
+visible={showExerciseSelection}
+onClose={() => setShowExerciseSelection(false)}
+/>
+      </View>
+    
   )
 }
 
