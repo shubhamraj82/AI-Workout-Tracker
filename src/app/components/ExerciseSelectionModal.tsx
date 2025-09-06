@@ -1,11 +1,14 @@
 import { View, Text, Modal, StatusBar, TouchableOpacity, TextInput,RefreshControl,FlatList } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { useWorkoutStore } from 'store/workout-store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { set } from 'date-fns';
 import ExerciseCard from '@/app/components/ExerciseCard'
+import { Exercise } from '@/lib/sanity/types';
+import { client } from '@/lib/sanity/client';
+import { exercisesQuery } from '../(app)/(tabs)/exercises';
 
 interface ExerciseSelectionModalProps{
     visible:boolean;
@@ -22,6 +25,40 @@ export default function ExerciseSelectionModal({
     const [searchQuery, setSearchQuery] = useState("");
     const [filteredExercises, setFilteredExercises] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(()=>{
+        if(visible){
+            fetchExercises();
+        }
+    },[visible])
+
+    useEffect(()=>{
+        const filtered=exercises.filter((exercise: Exercise) =>
+        exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredExercises(filtered);
+    },[searchQuery,exercises])
+
+    const fetchExercises = async () => {
+        try {
+            const exercises= await client.fetch(exercisesQuery);
+            setExercises(exercises);
+            setFilteredExercises(exercises);
+        } catch (error) {
+            console.error("Error fetching exercises:", error);
+        }
+    }
+
+    const handleExercisePress=(exercise: Exercise)=>{
+        //directly add exercises to worokout store
+        addExerciseToWorkout({name: exercise.name, sanityId: exercise._id});
+        onClose(); //close the modal after adding
+    }
+    const onRefresh= async ()=>{
+        setRefreshing(true);
+        await fetchExercises();
+        setRefreshing(false);
+    }
 
 
   return (
@@ -95,15 +132,15 @@ export default function ExerciseSelectionModal({
                 />
               }
               ListEmptyComponent={
-                <View className='bg-white rounded-2xl p-8 items-center'>
-                  <Ionicons className='text-outline' size={64} color="9CA3AF"/>
-                  <Text className='text-xl font-semibold text-gray-900 mt-4'>
+                <View className='flex-1 items-center justify-center py-20'>
+                  <Ionicons className='fitness-outline' size={64} color="D1D5DB"/>
+                  <Text className='text-xl font-semibold text-gray-400 mt-4'>
                     {searchQuery ? "no exercises found " : "Loading exercises..."}
                   </Text>
-                  <Text className='text-gray-600 text-center mt-2'>
+                  <Text className='text-sm text-gray-400  mt-2'>
                     {searchQuery
                     ? "Try adjusting your search"
-                    : "your exercise will appear here"
+                    : "Please wait a moment"
                     }
                   </Text>
                 </View>
