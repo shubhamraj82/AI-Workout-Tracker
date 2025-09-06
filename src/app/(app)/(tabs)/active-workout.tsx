@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView } from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, TextInput } from 'react-native'
 import React, { useState } from 'react'
 import {useStopwatch} from 'react-timer-hook';
 import { useWorkoutStore, WorkoutSet } from 'store/workout-store';
@@ -263,7 +263,118 @@ className='bg-blue-50 rounded-2xl p-4 mb-3'
   </View>
 </TouchableOpacity>
 
+           {/* Exercise-sets */}
+           <View className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-3'>
+            <Text className='text-lg font-semibold text-gray-900 mb-3'>
+              Sets
+            </Text>
+            {exercise.sets.length===0 ? (
+              <Text className='text-gray-500 text-center py-4'>
+                No sets yet . Add your first set below.
+              </Text>
+            ) : (
+              exercise.sets.map((set, setIndex) => (
+                <View
+                  key={set.id}
+                  className={`py-3 px-3 mb-2 rounded-lg border ${
+                    set.isCompleted
+                      ? "bg-green-100 border-green-300"
+                      : "bg-gray-50 border-gray-200"
+                  }`}
+                >
+                  {/* First row */}
+                  <View className='flex-row items-center justify-between'>
+                    <Text className='text-gray-700 font-medium w-8'>
+                      {setIndex + 1}
+                    </Text>
 
+                    {/* Reps Input */}
+                    <View className='flex-1 mx-2'>
+                      <Text className='text-sx text-gray-500 mb-1'>
+                        Reps
+                      </Text>
+                      <TextInput
+                      value={set.reps}
+                      onChangeText={(value) => 
+                        updateSet(exercise.id, set.id, "reps", value)
+                      }
+                      placeholder='0'
+                      keyboardType='numeric'
+                      className={`border rounded-lg px-3 py-2 text-center ${
+                        set.isCompleted
+                        ? "bg-gray-100 border-gray-300 text-gray-500"
+                        : "bg-white border-gray-300 "
+                      }`}
+                      editable={!set.isCompleted}
+                    />
+                    </View>
+
+                    {/* Weight-input */}
+                    <View className='flex-1 mx-2'>
+                      <Text className='text-sx text-gray-500 mb-1'>
+                        Weight ({weightUnit})
+                      </Text>
+                      <TextInput
+                      value={set.weight}
+                      onChangeText={(value) => 
+                        updateSet(exercise.id, set.id, "weight", value)
+                      }
+                      placeholder='0'
+                      keyboardType='numeric'
+                      className={`border rounded-lg px-3 py-2 text-center ${
+                        set.isCompleted
+                        ? "bg-gray-100 border-gray-300 text-gray-500"
+                        : "bg-white border-gray-300 "
+                      }`}
+                      editable={!set.isCompleted}
+                    />
+                    </View>
+                    {/* Toggle Complete Button */}
+                    <TouchableOpacity
+                      onPress={() => toggleSetCompletion(exercise.id, set.id)}
+                      className={`w-12 h-12 rounded-xl items-center justify-center mx-1 ${
+                        set.isCompleted ? "bg-green-500" : "bg-gray-200"
+                      }`}
+                    >
+                      <Ionicons
+                        name={set.isCompleted ? "checkmark" : "checkmark-outline"}
+                        size={20}
+                        color={set.isCompleted ? "white" : "#9CA3AF"}
+                      />
+                    </TouchableOpacity>
+
+                    {/* Delete-Button */}
+                    <TouchableOpacity
+                    onPress={()=> deleteSet(exercise.id,set.id)}
+                    className='w-12 h-12 rounded-xl items-center justify-center ml-1 bg-red-500'
+                    >
+                      <Ionicons
+                        name='trash-outline'
+                        size={20}
+                        color='white'
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
+
+            {/* Add new Set Button */}
+            <TouchableOpacity
+            onPress={() => addNewSet(exercise.id)}
+            className='bg-blue-100 border-2 border-dashed border-blue-300 rounded-lg py-3 items-center mt-2'
+            >
+              <View className='flex-row items-center'>
+                <Ionicons
+                name='add'
+                size={16}
+                color="#3B82F6"
+                style={{marginRight:6}}
+                />
+                <Text className='text-blue-600 font-medium'> Add Set</Text>
+              </View>
+            </TouchableOpacity>
+           </View>
         </View>
       ))}
 
@@ -286,6 +397,8 @@ className='bg-blue-50 rounded-2xl p-4 mb-3'
           </Text>
         </View>
       </TouchableOpacity>
+
+      
 
     </ScrollView>
   </KeyboardAvoidingView>
