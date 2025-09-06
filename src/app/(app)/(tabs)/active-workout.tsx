@@ -1,11 +1,9 @@
 import { View, Text, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import {useStopwatch} from 'react-timer-hook';
-import { useWorkoutStore } from 'store/workout-store';
+import { useWorkoutStore, WorkoutSet } from 'store/workout-store';
 import {  useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import exercise from 'workout-ai-app/schemaTypes/exercise';
-import Exercise from 'workout-ai-app/schemaTypes/exercise';
 import ExerciseSelectionModal from '@/app/components/ExerciseSelectionModal';
 
 export default function ActiveWorkout() {
@@ -59,6 +57,82 @@ export default function ActiveWorkout() {
   const addExercise=()=>{
     setShowExerciseSelection(true); 
   }
+
+  const deleteExercise=( exerciseId :string)=>{
+    setWorkoutExercises((exercises) =>
+      exercises.filter((exercise) => exercise.id !== exerciseId)
+    );
+  };
+
+  const addNewSet =(exerciseId:string)=>{
+    const newSet: WorkoutSet ={
+      id : Math.random().toString(),
+      reps:"",
+      weight:"",
+      weightUnit: weightUnit,
+      isCompleted:false,
+    };
+
+    setWorkoutExercises((exercises) =>
+      exercises.map((exercise) =>
+        exercise.id === exerciseId ? 
+    { ...exercise, sets: [...exercise.sets, newSet] }
+     : exercise
+      )
+    );
+  }
+
+  const updateSet=(
+    exerciseId:string,
+    setId:string,
+    field: "reps" | "weight",
+    value:string
+  )=>{
+    setWorkoutExercises((exercises) =>
+    exercises.map((exercise) =>
+      exercise.id === exerciseId
+    ?{
+        ...exercise,
+        sets: exercise.sets.map((set) =>
+          set.id === setId ? { ...set, [field]: value } : set
+      ),
+    }
+    :exercise
+    )
+    );
+  };
+
+  const deleteSet=(
+    exerciseId:string,
+    setId:string
+  )=>{
+    setWorkoutExercises((exercises) =>
+      exercises.map((exercise) =>
+        exercise.id === exerciseId
+          ? {
+              ...exercise,
+              sets: exercise.sets.filter((set) => set.id !== setId),
+            }
+          : exercise
+      )
+    );
+  };
+
+  const toggleSetCompletion= (exerciseId:string,setId:string)=>{
+    setWorkoutExercises((exercises) =>
+    exercises.map((exercise) =>
+    exercise.id === exerciseId
+    ?{
+        ...exercise,
+        sets: exercise.sets.map((set)=>
+         set.id === setId ? { ...set, isCompleted: !set.isCompleted }
+         : set
+        ),
+    }
+    :exercise
+    )
+    );
+  };
 
 
   return (
@@ -153,6 +227,42 @@ export default function ActiveWorkout() {
     <ScrollView className='flex-1 px-6 mt-4'>
       {workoutExercises.map((exercise)=>(
         <View key={exercise.id} className='mb-8'>
+
+{/* Execise header */}
+<TouchableOpacity
+onPress={()=>
+  router.push({
+    pathname:"/exercise-detail",
+    params:{
+      id:exercise.sanityId
+    },
+  })
+}
+className='bg-blue-50 rounded-2xl p-4 mb-3'
+>
+  <View className='flex-row items-center justify-between'>
+    <View className='flex-1'>
+      <Text className='text-xl font-bold text-gray-900 mb-2'>
+        {exercise.name}
+      </Text>
+      <Text className='text-gray-600'>
+        {exercise.sets.length} sets *{" "}
+        {exercise.sets.filter((set) => set.isCompleted).length}
+        {" "}
+        completed
+      </Text>
+    </View>
+
+    {/* Delete Exercise Button */}
+    <TouchableOpacity
+    onPress={()=>deleteExercise(exercise.id)}
+    className='w-10 h-10 rounded-xl items-center justify-center bg-red-500 ml-3'
+    >
+      <Ionicons name='trash' size={16} color="white"/>
+    </TouchableOpacity>
+  </View>
+</TouchableOpacity>
+
 
         </View>
       ))}
