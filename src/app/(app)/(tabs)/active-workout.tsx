@@ -1,13 +1,15 @@
-import { View, Text, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, TextInput } from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, Platform, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, TextInput, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import {useStopwatch} from 'react-timer-hook';
 import { useWorkoutStore, WorkoutSet } from 'store/workout-store';
 import {  useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import ExerciseSelectionModal from '@/app/components/ExerciseSelectionModal';
+import exercise from 'workout-ai-app/schemaTypes/exercise';
 
 export default function ActiveWorkout() {
   const [showExerciseSelection,setShowExerciseSelection] = useState(false);
+  const [isSaving,setIsSaving]= useState(false);
   const router =useRouter()
 
   const {
@@ -22,6 +24,37 @@ export default function ActiveWorkout() {
   const {seconds,minutes,hours,totalSeconds,reset}=useStopwatch({
     autoStart:true
   });
+
+  const endWorkout = async () =>{
+    const saved = await saveWorkoutToDatabase();
+    if(saved){
+      Alert.alert("workout saved", "Your workout has been saved successfully.");
+
+      resetWorkout();
+
+      router.replace("/(app)/(tabs)/history?refresh=true");
+    }
+  };
+
+  const saveWorkoutToDatabase = async ()=>{
+    // TODO: Implement actual saving logic
+    // For now, return true to indicate success
+    return true;
+  }
+
+  const saveWorkout =()=>{
+    //are you sure you want to complete the workout?
+    Alert.alert(
+      "Complete Workout",
+      "Are you sure you want to complete the workout?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Complete",
+          onPress: async() => await endWorkout()} ,
+      ]
+    );
+  }
 
   //Reset timer when screen is focused and no active workout {fresh start}
   useFocusEffect(
@@ -398,8 +431,39 @@ className='bg-blue-50 rounded-2xl p-4 mb-3'
         </View>
       </TouchableOpacity>
 
-      
-
+      {/* complete workout button */}
+      <TouchableOpacity
+      onPress={saveWorkout}
+      className={`rounded-2xl py-4 items-center mb-8 ${
+        isSaving ||
+        workoutExercises.length===0 ||
+        workoutExercises.some((exercise) =>
+        exercise.sets.some((set)=>!set.isCompleted)
+        )
+        ? "bg-gray-400"
+        : "bg-green-600 active:bg-green-700"
+      }`} 
+      disabled={
+        isSaving || 
+        workoutExercises.length===0 || 
+        workoutExercises.some((exercise)=>
+        exercise.sets.some((set)=>!set.isCompleted)
+        )
+      }
+      >
+        {isSaving ? (
+          <View className='flex-row items-center'>
+            <ActivityIndicator size="small" color="white"/>
+            <Text className='text-white font-semibold text-lg ml-2'>
+              Saving....
+            </Text>
+          </View>
+        ):(
+          <Text className='text-white font-semibold text-lg'>
+            Complete Workout
+          </Text>
+        )}
+      </TouchableOpacity>
     </ScrollView>
   </KeyboardAvoidingView>
 </View>
