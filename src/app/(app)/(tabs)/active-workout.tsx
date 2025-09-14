@@ -6,6 +6,7 @@ import {  useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import ExerciseSelectionModal from '@/app/components/ExerciseSelectionModal';
 import exercise from 'workout-ai-app/schemaTypes/exercise';
+import { set } from 'date-fns';
 
 export default function ActiveWorkout() {
   const [showExerciseSelection,setShowExerciseSelection] = useState(false);
@@ -39,7 +40,19 @@ export default function ActiveWorkout() {
   const saveWorkoutToDatabase = async ()=>{
     // TODO: Implement actual saving logic
     // For now, return true to indicate success
-    return true;
+    if(isSaving) return false; //prevent multiple saves
+
+    setIsSaving(true);
+
+    try {
+      
+    } catch (error) {
+      console.error("Error saving workout:", error);
+      Alert.alert("Save Failed","Failed to save workout. PLease try again.");
+      return false;
+    }finally{
+      setIsSaving(false);
+    }
   }
 
   const saveWorkout =()=>{
