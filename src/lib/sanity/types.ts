@@ -185,6 +185,14 @@ export type SanityAssetSourceData = {
 
 export type AllSanitySchemaTypes = Workout | Exercise | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageHotspot | SanityImageCrop | SanityFileAsset | SanityImageAsset | SanityImageMetadata | Geopoint | Slug | SanityAssetSourceData;
 export declare const internalGroqTypeReferenceTo: unique symbol;
+// Source: ../src/app/(app)/(tabs)/active-workout.tsx
+// Variable: findExerciseQuery
+// Query: *[_type=="exercise" && name == $name][0] {  _id,  name  }
+export type FindExerciseQueryResult = {
+  _id: string;
+  name: string | null;
+} | null;
+
 // Source: ../src/app/(app)/(tabs)/exercises.tsx
 // Variable: exercisesQuery
 // Query: *[_type == "exercise" && isActive == true] | order(name asc) {  _id,  _type,  _createdAt,  _updatedAt,  _rev,  name,  description,  difficulty,  image,  videoUrl,  isActive}
@@ -298,6 +306,7 @@ export type SingleExerciseQueryResult = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
+    "*[_type==\"exercise\" && name == $name][0] {\n  _id,\n  name\n  }": FindExerciseQueryResult;
     "*[_type == \"exercise\" && isActive == true] | order(name asc) {\n  _id,\n  _type,\n  _createdAt,\n  _updatedAt,\n  _rev,\n  name,\n  description,\n  difficulty,\n  image,\n  videoUrl,\n  isActive\n}": ExercisesQueryResult;
     "*[_type == \"workout\" && userId == $userId] | order(date desc) {\n  _id,\n  date,\n  duration,\n  exercises[] {\n  exercise-> {\n  _id,\n  name\n  },\n  sets[] {\n  reps,\n  weight,\n  weightUnit,\n  _type,\n  _key\n  },\n  _type,\n  _key\n  }\n  }": GetWorkoutQueryResult;
     "*[_type == \"workout\" && _id == $workoutId ][0]{\n  _id,\n  _type,\n  _createdAt,\n  date,\n  duration,\n  exercises[] {\n  exercise-> {\n  _id,\n  name,\n  description\n  },\n  sets[] {\n  reps,\n  weight,\n  weightUnit,\n  _type,\n  _key\n  },\n  _type,\n  _key\n}\n  }": GetworkoutRecordQueryResult;

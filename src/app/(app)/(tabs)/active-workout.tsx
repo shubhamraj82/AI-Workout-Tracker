@@ -5,13 +5,23 @@ import { useWorkoutStore, WorkoutSet } from 'store/workout-store';
 import {  useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import ExerciseSelectionModal from '@/app/components/ExerciseSelectionModal';
-import exercise from 'workout-ai-app/schemaTypes/exercise';
-import { set } from 'date-fns';
+import { client } from '@/lib/sanity/client';
+import { defineQuery } from 'groq';
+import { useUser } from '@clerk/clerk-expo';
+import { WorkoutData } from '@/app/api/save-workout+api';
+
+//Query to find exercise by name
+const findExerciseQuery =
+defineQuery(`*[_type=="exercise" && name == $name][0] {
+  _id,
+  name
+  }`);
 
 export default function ActiveWorkout() {
   const [showExerciseSelection,setShowExerciseSelection] = useState(false);
   const [isSaving,setIsSaving]= useState(false);
   const router =useRouter()
+  const {user}=useUser();
 
   const {
     workoutExercises,
@@ -45,7 +55,72 @@ export default function ActiveWorkout() {
     setIsSaving(true);
 
     try {
+      //implement saving
+      //  the stopwatch total durations in second
+
+      const durationInSeconds = totalSeconds; 
+
+      //Transform exercises to match the backend schema i.e sanity schema
+      const exerciseForSanity=await Promise.all(
+        workoutExercises.map(async (exercise)=>{
+          // Find the exercise document in Sanity by name
+          const exerciseDoc =await client.fetch(findExerciseQuery, {
+            name:exercise.name,
+          });
+          if(!exerciseDoc){
+            throw new Error(
+              `Exercise "${exercise.name}" not found in database`
+            );
+          }
+
+          // Transform sets to match schema (only completed sets, convert strings to numbers)
+          const setsForSanity = exercise.sets
+          .filter((set)=> set.isCompleted && set.reps && set.weight)
+          .map((set)=>({
+            _type:"set",
+            _key:Math.random().toString(36).substr(2,9),
+            reps:parseInt(set.reps) || 0,
+            weight:parseFloat(set.weight)|| 0,
+            weightUnit:set.weightUnit,
+          }));
+          return {
+            _type:"workoutExercise",
+            _key:Math.random().toString(36).substr(2,9),
+            exercise:{
+              _type:"reference",
+              _ref:exerciseDoc._id,
+            },
+            sets: setsForSanity,
+          };
+        })
+      );
+
+      //Filter out exercise with no complete sets
+      const validatedExercises = exerciseForSanity.filter(
+        (exercise) => exercise.sets.length > 0
+      );
+
+      if(validatedExercises.length===0){
+        Alert.alert("No completed sets","Please complete at least one set before saving the workout.");
+        return false;
+      }
+
+      // Create the workout document
+      const workoutData: WorkoutData = {
+        _type:"workout",
+        userId:user?.id || "",
+        date:new Date().toISOString(),
+        duration:durationInSeconds,
+        exercises:validatedExercises,
+      };
       
+      //save the sanity via api
+      const result = await fetch("/api/save-workout",{
+        method:"POST",
+        body:JSON.stringify({workoutData}),
+      });
+      console.log("Workout saved successfuly:", result);
+      return true;
     } catch (error) {
       console.error("Error saving workout:", error);
       Alert.alert("Save Failed","Failed to save workout. PLease try again.");
@@ -215,7 +290,7 @@ export default function ActiveWorkout() {
                     weightUnit === "lbs" ? "text-white" : "text-gray-300"
                   }`}
                   >
-                    libs
+                    lbs
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
