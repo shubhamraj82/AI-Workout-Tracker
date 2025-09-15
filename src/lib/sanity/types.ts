@@ -273,6 +273,30 @@ export type GetworkoutRecordQueryResult = {
   }> | null;
 } | null;
 
+// Source: ../src/app/(app)/(tabs)/profile/index.tsx
+// Variable: getWorkoutsQuery
+// Query: *[_type == "workout" && userId == $userId] | order(date desc){  _id,  date,  duration,  exercises[]{  exercise-> {  _id,  name  },  sets[] {  reps,  weight,  weightUnit,  _type,  _key  },  _type,  _key  }  }
+export type GetWorkoutsQueryResult = Array<{
+  _id: string;
+  date: string | null;
+  duration: number | null;
+  exercises: Array<{
+    exercise: {
+      _id: string;
+      name: string | null;
+    } | null;
+    sets: Array<{
+      reps: number | null;
+      weight: number | null;
+      weightUnit: "kg" | "lbs" | null;
+      _type: null;
+      _key: string;
+    }> | null;
+    _type: null;
+    _key: string;
+  }> | null;
+}>;
+
 // Source: ../src/app/(app)/exercise-detail.tsx
 // Variable: singleExerciseQuery
 // Query: *[_type == "exercise" && _id== $id][0] {        _id,        _type,        _createdAt,        _updatedAt,        _rev,        name,        description,        difficulty,        image,        videoUrl,        isActive    }
@@ -310,6 +334,7 @@ declare module "@sanity/client" {
     "*[_type == \"exercise\" && isActive == true] | order(name asc) {\n  _id,\n  _type,\n  _createdAt,\n  _updatedAt,\n  _rev,\n  name,\n  description,\n  difficulty,\n  image,\n  videoUrl,\n  isActive\n}": ExercisesQueryResult;
     "*[_type == \"workout\" && userId == $userId] | order(date desc) {\n  _id,\n  date,\n  duration,\n  exercises[] {\n  exercise-> {\n  _id,\n  name\n  },\n  sets[] {\n  reps,\n  weight,\n  weightUnit,\n  _type,\n  _key\n  },\n  _type,\n  _key\n  }\n  }": GetWorkoutQueryResult;
     "*[_type == \"workout\" && _id == $workoutId ][0]{\n  _id,\n  _type,\n  _createdAt,\n  date,\n  duration,\n  exercises[] {\n  exercise-> {\n  _id,\n  name,\n  description\n  },\n  sets[] {\n  reps,\n  weight,\n  weightUnit,\n  _type,\n  _key\n  },\n  _type,\n  _key\n}\n  }": GetworkoutRecordQueryResult;
+    "*[_type == \"workout\" && userId == $userId] | order(date desc){\n  _id,\n  date,\n  duration,\n  exercises[]{\n  exercise-> {\n  _id,\n  name\n  },\n  sets[] {\n  reps,\n  weight,\n  weightUnit,\n  _type,\n  _key\n  },\n  _type,\n  _key\n  }\n  }": GetWorkoutsQueryResult;
     "*[_type == \"exercise\" && _id== $id][0] {\n        _id,\n        _type,\n        _createdAt,\n        _updatedAt,\n        _rev,\n        name,\n        description,\n        difficulty,\n        image,\n        videoUrl,\n        isActive\n    }": SingleExerciseQueryResult;
   }
 }

@@ -7,7 +7,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { defineQuery } from "groq";
 import { formatDuration } from "lib/utils";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, RefreshControl, SafeAreaView, ScrollView, Text,TouchableOpacity,View } from "react-native";
+import { ActivityIndicator, RefreshControl, SafeAreaView, ScrollView, StatusBar, Text,TouchableOpacity,View } from "react-native";
 import workout from "workout-ai-app/schemaTypes/workout";
 
 export const getWorkoutQuery = 
@@ -126,7 +126,8 @@ export default function HistoryPage() {
     );
   }
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-white">
+      L<StatusBar barStyle="dark-content" backgroundColor="white"/>
       {/* header */}
       <View className="px-6 py-4 bg-white border-b border-gray-200">
         <Text className="text-2xl font-bold text-gray-900">
