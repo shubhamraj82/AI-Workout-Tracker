@@ -18,6 +18,7 @@ export default function Page() {
     if (!isLoaded) return
     if(!emailAddress || !password){
         Alert.alert("Error","Please fill in all fields")
+        
     }
 
     setIsLoading(true)
@@ -33,7 +34,7 @@ export default function Page() {
       // and redirect the user
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/')
+        router.replace('/(app)/(tabs)')
       } else {
         // If the status isn't complete, check why. User might need to
         // complete further steps.
@@ -43,6 +44,7 @@ export default function Page() {
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
       console.error(JSON.stringify(err, null, 2))
+       Alert.alert("Error", "Invalid email or password") 
     } finally{
         setIsLoading(false)
     }
@@ -82,7 +84,7 @@ export default function Page() {
                             Email
                         </Text>
                         <View className='flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border border-gray-400'>
-                            <Ionicons name='mail-outline' size={20} color="6B7280"/>
+                            <Ionicons name='mail-outline' size={20} color="#6B7280"/>
                             <TextInput
                             autoCapitalize='none'
                             value={emailAddress}
@@ -104,7 +106,7 @@ export default function Page() {
                             <Ionicons name='lock-closed-outline' size={20} color="#6B7280"/>
                             <TextInput 
                              value={password}
-                            placeholder='Enter your email'
+                            placeholder='Enter your password'
                             placeholderTextColor="#9CA3AF"
                             secureTextEntry={true}
                             onChangeText={setPassword}
@@ -163,7 +165,6 @@ export default function Page() {
             Start Your Fitness journey Today
         </Text>
       </View>
-
       </View>
       </KeyboardAvoidingView>
    </SafeAreaView>

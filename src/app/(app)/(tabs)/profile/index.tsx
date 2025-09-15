@@ -70,6 +70,7 @@ useEffect(()=>{
 // calculate stats
 const totalWorkouts = workouts.length;
 const totalDuration = workouts.reduce((sum, workout) => sum + (workout.duration || 0), 0);
+const averageDuration = totalWorkouts > 0 ? totalDuration / totalWorkouts : 0;
 
 // calculate days  since joining (using creatwdAt from clerk)
 const joinDate = user?.createdAt ? new Date(user.createdAt) : new Date();
@@ -164,13 +165,87 @@ return (
           {daySinceJoining}
         </Text>
         <Text className="text-sm text-gray-600 text-center">
-          Days{"\n"}Active
+          Days{"\n"}Since Joining
         </Text>
       </View>
     </View>
+    {totalWorkouts>0 && (
+        <View className="mt-4 pt-4 border-t border-gray-100">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-gray-600">
+              Average Workout durations:
+            </Text>
+            <Text className="font-semibold text-gray-900">
+              {formatDuration(averageDuration)}
+            </Text>
+          </View>
+        </View>
+      )}
   </View>
 </View>
 
+{/* //account-settings */}
+
+<View className="px-6 mb-6">
+  <Text className="text-lg font-semibold text-gray-900">
+    Account Settings
+  </Text>
+
+  {/* Setting Options */}
+  <View className="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-gray-100">
+      <View className=" flex-row items-center">
+        <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center mr-3">
+          <Ionicons name="person-outline" size={20} color="#3B82F6"/>
+        </View>
+        <Text className="text-gray-900 font-medium">Edit Profile</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="#6B7280"/>
+    </TouchableOpacity>
+
+    <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-gray-100">
+      <View className="flex-row items-center">
+        <View className="h-10 w-10 bg-green-100 rounded-full items-center justify-center mr-3">
+          <Ionicons
+          name="notifications-outline"
+          size={20}
+          color="#10B981"
+          />
+        </View>
+        <Text className="text-gray-900 font-medium">Notifications</Text>
+      </View>
+      <Ionicons  name="chevron-forward" size={20} color="#6B7280"/>
+    </TouchableOpacity>
+
+ <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-gray-100">
+      <View className="flex-row items-center">
+        <View className="h-10 w-10 bg-purple-100 rounded-full items-center justify-center mr-3">
+          <Ionicons
+          name="settings-outline"
+          size={20}
+          color="#10B981"
+          />
+        </View>
+        <Text className="text-gray-900 font-medium">Prefrences</Text>
+      </View>
+      <Ionicons  name="chevron-forward" size={20} color="#6B7280"/>
+    </TouchableOpacity>
+
+    <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-gray-100">
+      <View className="flex-row items-center">
+        <View className="h-10 w-10 bg-purple-100 rounded-full items-center justify-center mr-3">
+          <Ionicons
+          name="help-circle-outline"
+          size={20}
+          color="#10B981"
+          />
+        </View>
+        <Text className="text-gray-900 font-medium">Help & Support</Text>
+      </View>
+      <Ionicons  name="chevron-forward" size={20} color="#6B7280"/>
+    </TouchableOpacity>
+  </View>
+</View>
       {/* sign-out */}
       <View className="px-6 mb-8">
         <TouchableOpacity
