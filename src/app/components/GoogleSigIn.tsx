@@ -1,83 +1,56 @@
 import React, { useCallback, useEffect } from 'react'
 import * as WebBrowser from 'expo-web-browser'
-import * as AuthSession from 'expo-auth-session'
-import { useSSO } from '@clerk/clerk-expo'
-import { View, Button, TouchableOpacity ,Text} from 'react-native'
-import { router } from 'expo-router'
+import { useOAuth } from '@clerk/clerk-expo' // ← Fixed: Use useOAuth instead of useSSO
+import { View, TouchableOpacity, Text, Alert } from 'react-native'
+import { useRouter } from 'expo-router' // ← Fixed: Import useRouter
 import { Ionicons } from '@expo/vector-icons'
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
-    // Preloads the browser for Android devices to reduce authentication load time
-    // See: https://docs.expo.dev/guides/authentication/#improving-user-experience
     void WebBrowser.warmUpAsync()
     return () => {
-      // Cleanup: closes browser when component unmounts
       void WebBrowser.coolDownAsync()
     }
   }, [])
 }
 
-// Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession()
 
 export default function GoogleSignIn() {
   useWarmUpBrowser()
-
-  // Use the `useSSO()` hook to access the `startSSOFlow()` method
-  const { startSSOFlow } = useSSO()
+  
+  const router = useRouter() // ← Fixed: Use useRouter hook
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' }) // ← Fixed: Use useOAuth
 
   const onPress = useCallback(async () => {
     try {
-      // Start the authentication process by calling `startSSOFlow()`
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        strategy: 'oauth_google',
-        // For web, defaults to current path
-        // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
-        // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
-        redirectUrl: AuthSession.makeRedirectUri(),
-      })
+      const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow()
 
-      // If sign in was successful, set the active session
       if (createdSessionId) {
-        setActive!({
-          session: createdSessionId,
-          navigate: async ({ session }) => {
-            if (session?.currentTask) {
-              // Check for tasks and navigate to custom UI to help users resolve them
-              // See https://clerk.com/docs/custom-flows/overview#session-tasks
-              console.log(session?.currentTask)
-              return
-            }
-
-            router.push('/')
-          },
-        })
+        await setActive({ session: createdSessionId })
+        router.replace('/(app)/(tabs)') // ← Fixed: Correct route
       } else {
-        // If there is no `createdSessionId`,
-        // there are missing requirements, such as MFA
-        // Use the `signIn` or `signUp` returned from `startSSOFlow`
-        // to handle next steps
+        // Handle sign-up flow if needed
+        console.log('OAuth flow incomplete - additional steps required')
       }
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      console.error('Google Sign-In Error:', JSON.stringify(err, null, 2))
+      Alert.alert('Error', 'Failed to sign in with Google. Please try again.')
     }
-  }, [])
+  }, [startOAuthFlow, router])
 
   return (
-  <TouchableOpacity
-  onPress={onPress}
-  className='bg-white border-2 border-gray-200 rounded-xl py-4 shadow-sm'
-  activeOpacity={0.8}
-  >
-    <View className='flex-row items-center justify-center'>
+    <TouchableOpacity
+      onPress={onPress}
+      className='bg-white border-2 border-gray-200 rounded-xl py-4 shadow-sm'
+      activeOpacity={0.8}
+    >
+      <View className='flex-row items-center justify-center'>
         <Ionicons name='logo-google' size={20} color="#EA4335" />
         <Text className='text-gray-900 font-semibold text-lg ml-3'>
-            Continue in with Google
+          Continue with Google {/* ← Fixed: Removed extra "in" */}
         </Text>
-    </View>
-  </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
   )
 }
